@@ -232,6 +232,8 @@ mkdir plots
 ./bcftools filter -O z -o g.morbida.freebayes.filtered.vcf.gz -s LOWQUAL -i'%QUAL>100' g.morbida.freebayes.vcf
 gunzip g.morbida.freebayes.filtered.vcf.gz
 ```
+#### filter low quality SNPs
+```
 ./bcftools filter -O z -o g.morbida.filtered.vcf.gz -s LOWQUAL -i'%QUAL>100' g.morbida.vcf.gz
 ```
 #### extract pathogenic SNPs using data from MacManes paper 
