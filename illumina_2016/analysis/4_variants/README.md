@@ -80,7 +80,10 @@ java -Xmx20g -jar /lustre/projects/staton/software/GenomeAnalysisTK-3.5-0/Genome
 -o ${e}_realigned.bam &
 done
 ```
+#### Cannot recalibrate without having known SNPs, ie a VCF file.
+```
 echo "Cannot recalibrate without having known SNPs, ie a VCF file."
+```
 ####for f in `ls *_realigned.bam`
 ```
 ```
@@ -189,19 +192,15 @@ done
 ```
 ./freebayes -f g.morbida.scaffolds.fasta -p 1 g.morbida.aligned.bam > g.morbida.freebayes.vcf
 ```
+#### Call SNPs using mpileup
+```
 ./samtools mpileup -t AD,DP -go g.morbida.bcf -f g.morbida.scaffolds.fasta 1.bam 2.bam 3.bam 4.bam 5.bam
-####samtools mpileup -go g.morbida.bcf -f g.morbida.scaffolds.fasta *realigned_mDup_realigned.bam
-```
-```
-####samtools mpileup -ugf g.morbida.scaffolds.fasta *realigned_mDup_realigned.bam |\
-```
-```
-####./bcftools call -vmO z -o g.morbida.vcf.gz
-```
 ```
 #### shows genes that overlap with snps
 ```
 ./intersectBed -a g.morbida.genes.gff -b g.morbida.freebayes.vcf  
+```
+#### convert vcf to bcf
 ```
 module load samtools
 ./bcftools call -vmO z -o g.morbida.vcf.gz g.morbida.bcf
@@ -209,62 +208,66 @@ module load samtools
 #### shows snps that overlap with genes
 ```
 ./intersectBed -b g.morbida.genes.gff -a g.morbida.freebayes.vcf  
+./intersectBed -b Znfx1.gff -a g.morbida.freebayes.vcf
+./intersectBed -b GLI2.gff -a g.morbida.freebayes.vcf
+./intersectBed -b casA.gff -a g.morbida.freebayes.vcf
 ```
-####./intersectBed -b Znfx1.gff -a g.morbida.freebayes.vcf
-```
-```
-####./intersectBed -b GLI2.gff -a g.morbida.freebayes.vcf
-```
-```
-####./intersectBed -b casA.gff -a g.morbida.freebayes.vcf
-```
+#### index vcf file
 ```
 module load samtools
 ./tabix -p vcf g.morbida.vcf.gz
 ```
+#### calling stats using bcftools
+```
 ./bcftools stats -F g.morbida.scaffolds.fasta -s - g.morbida.vcf.gz > g.morbida.vcf.stats
 mkdir plots
 ./plot-vcfstats -p plots/ g.morbida.vcf.stats 
+```
 #### need to use a different version of python to generate plots
 ```
 /lustre/projects/staton/software/ActivePython-2.7.8/bin/python plots/plot.py
+```
+#### use bcftools to filter LOWQUAL SNPs
 ```
 ./bcftools filter -O z -o g.morbida.freebayes.filtered.vcf.gz -s LOWQUAL -i'%QUAL>100' g.morbida.freebayes.vcf
 gunzip g.morbida.freebayes.filtered.vcf.gz
 ```
 ./bcftools filter -O z -o g.morbida.filtered.vcf.gz -s LOWQUAL -i'%QUAL>100' g.morbida.vcf.gz
 ```
+#### extract pathogenic SNPs using data from MacManes paper 
+```
 sed 's/-mRNA-1//g' g.morbida.phibase.e1E-6 | cut -f 1 > g.morbida.pathogenic.txt
 grep -Fwf g.morbida.pathogenic.txt g.morbida.genes.gff > g.morbida.pathogenic.gff
 cut -f 1,4,5,9 g.morbida.pathogenic.gff > g.morbida.pathogenic.bed
 ./intersectBed -b g.morbida.pathogenic.bed -a g.morbida.freebayes.filtered.vcf > g.morbida.pathogenic.vcf
+```
+#### Use SNPeff to classify SNPs into categories based on expected effect on reading frame
 ```
 grep -v "LOWQUAL" g.morbida.pathogenic.vcf > g.morbida.pathogenic.filt.vcf
 java -jar /lustre/projects/staton/software/snpEff/snpEff.jar eff -csvStats g.morbida.pathogenic.snpEff.csv -s g.morbida.pathogenic.snpEff.html g.morbida g.morbida.pathogenic.filt.vcf > g.morbida.pathogenic.snpEff.vcf
 java -jar /lustre/projects/staton/software/snpEff/snpEff.jar eff -csvStats g.morbida.freebayes.snpEff.csv -s g.morbida.freebayes.snpEff.html g.morbida g.morbida.freebayes.filt.vcf > g.morbida.freebayes.snpEff.vcf
 java -jar /lustre/projects/staton/software/snpEff/snpEff.jar eff -csvStats g.morbida.freebayes.genes.snpEff.csv -s g.morbida.freebayes.genes.snpEff.html g.morbida g.morbida.freebayes.filt.genes.vcf > g.morbida.freebayes.genes.snpEff.vcf
 ```
+#### use vcf tools to create plink format
+```
 sed 's/scaffold_//g' g.morbida.pathogenic.snpEff.vcf > g.morbida.pathogenic.plink.vcf.tmp
 cat vcf.header.txt g.morbida.pathogenic.plink.vcf.tmp > g.morbida.pathogenic.plink.vcf
 /lustre/projects/staton/software/vcftools_0.1.12a/bin/vcftools \
 --vcf g.morbida.pathogenic.plink.vcf \
 --plink
-####sed 's/scaffold_//g' g.morbida.freebayes.vcf > g.morbida.freebayes.plink.vcf
+sed 's/scaffold_//g' g.morbida.freebayes.vcf > g.morbida.freebayes.plink.vcf
+/lustre/projects/staton/software/vcftools_0.1.12a/bin/vcftools \
+--vcf g.morbida.freebayes.plink.vcf \
+--plink
 ```
-```
-####/lustre/projects/staton/software/vcftools_0.1.12a/bin/vcftools \
-```
-```
-####--vcf g.morbida.freebayes.plink.vcf \
-```
-```
-####--plink
-```
+#### Use plink to generate mds plots (output mds plots in R)
 ```
 /lustre/projects/staton/software/plink-1.07-x86_64/plink \
 --file out --genome --noweb
 /lustre/projects/staton/software/plink-1.07-x86_64/plink \
 --file out --read-genome plink.genome --mds-plot 4 --noweb
+```
+#### Cleanup directory
 ```
 rm -f *.intervals *_realigned.* *_metrics.txt *.sorted.bam*
 ```
