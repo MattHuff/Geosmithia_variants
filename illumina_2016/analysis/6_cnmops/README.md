@@ -1,5 +1,10 @@
 This R script was run locally.
 ![Alt text](./Rplot.png?raw=true "Plots")
+![Alt text](./GM108seg.png?raw=true "GM108")
+![Alt text](./GM17seg.png?raw=true "GM17")
+![Alt text](./GM188seg.png?raw=true "GM188")
+![Alt text](./GM205seg.png?raw=true "GM205")
+![Alt text](./GM20seg.png?raw=true "GM20")
 ####install software
 ```
 source("http://bioconductor.org/biocLite.R")
