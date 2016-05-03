@@ -175,6 +175,8 @@ samtools index 1.bam
 rm -f header.sam header_fix.sam tmp.bam
 ```
 ---
+####merge bam files
+```
 module load samtools
 samtools merge 09_TEST3.bam *realigned_mDup_realigned.bam
 ```
