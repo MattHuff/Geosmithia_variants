@@ -1,4 +1,5 @@
 This R script was run locally.
+![Alt text](./Rplot.png?raw=true "Plots")
 ####install software
 ```
 source("http://bioconductor.org/biocLite.R")
