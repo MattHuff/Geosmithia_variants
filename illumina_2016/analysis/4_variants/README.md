@@ -1,3 +1,5 @@
+### Analysis of the variants in Geosmithia morbida
+The following analysis uses bowtie2 aligned .bam files to determine variants across 5 populations of g. morbida: GM108, GM17, GM188, GM20, and GM205.
 ####create links to relevant files
 ```
 ln -s ../../raw_data/g.morbida.scaffolds.fasta ./
