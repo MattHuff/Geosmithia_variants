@@ -1,4 +1,3 @@
-01_setup.sh
 ####create links to relevant files
 ```
 ln -s ../../raw_data/g.morbida.scaffolds.fasta ./
@@ -57,7 +56,6 @@ samtools index $f
 done
 ```
 ---
-02_realign.sh
 ####Realign SNPs using GATK
 ```
 for f in `ls *.bam`
@@ -71,7 +69,6 @@ java -Xmx50g -jar /lustre/projects/staton/software/GenomeAnalysisTK-3.5-0/Genome
 done
 ```
 ---
-03_realignIndel.sh
 ####Realign around indels using GATK
 ```
 for f in `ls *.bam`
@@ -86,7 +83,6 @@ java -Xmx20g -jar /lustre/projects/staton/software/GenomeAnalysisTK-3.5-0/Genome
 done
 ```
 ---
-04_duplicates.sh
 ####Mark duplicates using picard tools
 ```
 module load java/jdk8u5
@@ -102,7 +98,6 @@ METRICS_FILE=${e}_mDup_metrics.txt &
 done
 ```
 ---
-05_index.sh
 ####Index using samtools
 ```
 module load samtools
@@ -112,7 +107,6 @@ samtools index $f &
 done
 ```
 ---
-06_realign.sh
 ####Realign around deduped SNPs using GATK
 ```
 for f in `ls *_realigned_mDup.bam`
@@ -135,7 +129,6 @@ rm -f $e.ogs
 done
 ```
 ---
-07_realignIndel.sh
 ####Realign around deduped indels using GATK
 ```
 for f in `ls *_realigned_mDup.bam`
@@ -158,7 +151,6 @@ rm -f $e.ogs
 done
 ```
 ---
-08_header.sh
 ####Fix headers in the bam files and reindex them 
 ```
 module load samtools
@@ -183,12 +175,10 @@ samtools index 1.bam
 rm -f header.sam header_fix.sam tmp.bam
 ```
 ---
-09_merge.sh
 module load samtools
 samtools merge 09_TEST3.bam *realigned_mDup_realigned.bam
 ```
 ---
-10_freebayes.sh
 ####Call variants using freebayes setting the ploidy level @ 1
 ```
 #./freebayes -f g.morbida.scaffolds.fasta -p 1 g.morbida.aligned.bam > g.morbida.freebayes.vcf
@@ -196,13 +186,11 @@ samtools merge 09_TEST3.bam *realigned_mDup_realigned.bam
 ./freebayes -f g.morbida.scaffolds.fasta -p 1 09_TEST3.bam > 10_TEST.vcf >& OTHER
 ```
 ---
-11_bedtools.sh
 ####shows genes that overlap with snps
 ```
 ./intersectBed -a g.morbida.genes.gff -b g.morbida.freebayes.vcf  
 ```
 ---
-12_bedtools.sh
 ####shows snps that overlap with genes
 ```
 ./intersectBed -b g.morbida.genes.gff -a g.morbida.freebayes.vcf  
@@ -217,7 +205,6 @@ grep "casA" g.morbida.genes.gff > casA.gff
 ./intersectBed -b casA.gff -a g.morbida.freebayes.vcf
 ```
 ---
-13_stats.sh
 ####calling stats using bcftools
 ```
 ./bcftools stats -F g.morbida.scaffolds.fasta -s - g.morbida.vcf.gz > g.morbida.vcf.stats
@@ -229,14 +216,12 @@ mkdir plots
 /lustre/projects/staton/software/ActivePython-2.7.8/bin/python plots/plot.py
 ```
 ---
-14_filter.sh
 ####use bcftools to filter LOWQUAL SNPs
 ```
 ./bcftools filter -O z -o g.morbida.freebayes.filtered.vcf.gz -s LOWQUAL -i'%QUAL>100' g.morbida.freebayes.vcf
 gunzip g.morbida.freebayes.filtered.vcf.gz
 ```
 ---
-15_pathogenicSNPs.sh
 ####extract pathogenic SNPs using data from MacManes paper, http://biorxiv.org/content/early/2016/01/08/036285.full-text.pdf+html, (see line 222)
 ```
 wget https://goo.gl/SZA4Kd
@@ -254,7 +239,6 @@ cut -f 1,4,5,9 g.morbida.pathogenic.gff > g.morbida.pathogenic.bed
 rm -f g.morbida.pathogenic.txt g.morbida.phibase.e1E-6
 ```
 ---
-16_snpEff.sh
 ####Use SNPeff to classify variants into categories based on expected effect on reading frame
 ```
 ```
@@ -277,7 +261,6 @@ java -jar /lustre/projects/staton/software/snpEff/snpEff.jar eff -csvStats g.mor
 java -jar /lustre/projects/staton/software/snpEff/snpEff.jar eff -csvStats g.morbida.freebayes.genes.snpEff.csv -s g.morbida.freebayes.genes.snpEff.html g.morbida g.morbida.freebayes.genes.filt.vcf > g.morbida.freebayes.genes.snpEff.vcf
 ```
 ---
-17_vcftools.sh
 ####use vcf tools to create plink format
 ```
 #sed 's/scaffold_//g' g.morbida.pathogenic.snpEff.vcf > g.morbida.pathogenic.plink.vcf.tmp
@@ -296,7 +279,6 @@ sed 's/scaffold_//g' g.morbida.freebayes.vcf > g.morbida.freebayes.plink.vcf
 --plink
 ```
 ---
-18_plink.sh
 ####Use plink to generate mds plots (output mds plots in R)
 ```
 /lustre/projects/staton/software/plink-1.07-x86_64/plink \
@@ -316,7 +298,6 @@ rm -f plink.nosex plink.log
 #--file 17_pathogenic --read-genome 18_pathogenic.genome --mds-plot 4 --noweb
 ```
 ---
-19_cleanup.sh
 ####Cleanup directory
 ```
 rm -f *.intervals *_realigned.* *_metrics.txt *.sorted.bam*
