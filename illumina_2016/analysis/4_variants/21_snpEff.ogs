@@ -1,0 +1,9 @@
+#$ -q short*
+#$ -N snpEff
+#$ -o 21.o
+#$ -e 21.e
+#$ -cwd
+#$ -l mem=4g
+module load java/jdk8u5
+java -jar /lustre/projects/staton/software/snpEff/snpEff.jar eff -formatEff -csvStats g.morbida.pathogenic.snpEff2.csv -s g.morbida.pathogenic.snpEff2.html g.morbida g.morbida.pathogenic.filt.vcf > g.morbida.pathogenic.snpEff2.vcf
+java -jar /lustre/projects/staton/software/snpEff/snpEff.jar eff -formatEff -csvStats g.morbida.freebayes.genes.snpEff2.csv -s g.morbida.freebayes.genes.snpEff2.html g.morbida g.morbida.freebayes.genes.filt.vcf > g.morbida.freebayes.genes.snpEff2.vcf
